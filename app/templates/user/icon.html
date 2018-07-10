@@ -1,0 +1,10 @@
+{% extends 'common/base.html' %}
+
+{% block title %}修改头像{% endblock %}
+
+{% block page_content %}
+    {% if img_url %}
+        <img src="{{ img_url }}">
+    {% endif %}
+    {{ quick_form(form) }}
+{% endblock %}

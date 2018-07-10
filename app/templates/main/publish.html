@@ -1,0 +1,47 @@
+{% extends 'common/base.html' %}
+
+{# 导入分页显示的宏 #}
+{% from 'common/macro.html' import show_pagination %}
+
+{% block title %}我发表的{% endblock %}
+
+{% block page_content %}
+    {% for p in posts %}
+        <div class="media">
+            <div class="media-left">
+                <a href="#">
+                    <img class="media-object" src="{{ url_for('static', filename='upload/'+p.user.icon) }}" alt="头像">
+                </a>
+            </div>
+            <div class="media-body">
+                <div style="float: right;">{{ moment(p.timestamp).fromNow() }}</div>
+                <h4 class="media-heading">{{ p.user.username }}</h4>
+                {{ p.content }}
+            {% if current_user.is_authenticated %}
+                {% if current_user.is_favorite(p.id) %}
+                    <div class="collect" url="{{ url_for('posts.collect', pid=p.id) }}">取消收藏</div>
+                {% else %}
+                    <div class="collect" url="{{ url_for('posts.collect', pid=p.id) }}">收藏</div>
+                {% endif %}
+            {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    {# 显示分页导航条， 可以传递额外的参数 #}
+    {{ show_pagination(pagination, 'posts.publish_me', id=3, name='xxx') }}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(function () {
+            $('.collect').click(function () {
+                // 回调函数中的this没有意义，因此需要先记录下来
+                _this = this
+                $.get($(this).attr('url'), function (data) {
+                    $(_this).text(data.status)
+                })
+            })
+        })
+    </script>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'common/base.html' %}
+
+{# 导入分页显示的宏 #}
+{% from 'common/macro.html' import show_pagination %}
+
+{% block title %}首页{% endblock %}
+
+{% block page_content %}
+    {{ quick_form(form) }}
+    {% for p in posts %}
+        <div class="media">
+            <div class="media-left">
+                <a href="#">
+                    <img class="media-object" src="{{ url_for('static', filename='upload/'+p.user.icon) }}" alt="头像">
+                </a>
+            </div>
+            <div class="media-body">
+                <div style="float: right;">{{ moment(p.timestamp).fromNow() }}</div>
+                <h4 class="media-heading">{{ p.user.username }}</h4>
+                {{ p.content }}
+            {% if current_user.is_authenticated %}
+                <div id="aaa">
+                    {% if current_user.is_favorite(p.id) %}
+                        <div class="collect" url="{{ url_for('posts.collect', pid=p.id)}}" style="width: 70px;float: left">取消收藏</div>
+                    {% else %}
+                        <div class="collect" url="{{ url_for('posts.collect', pid=p.id)}}" style="width: 70px;float: left">收藏</div>
+                    {% endif %}
+                    <div class="reply" style="float: left;width: 40px">
+                            <a href="{{ url_for('posts.replyblog') }}">回复</a>
+                    </div>
+                </div>
+            {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    {# 显示分页导航条， 可以传递额外的参数 #}
+    {{ show_pagination(pagination, 'main.index', id=3, name='xxx') }}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        $(function () {
+            $('.collect').click(function () {
+                // 回调函数中的this没有意义，因此需要先记录下来
+                _this = this
+                $.get($(this).attr('url'), function (data) {
+                    $(_this).text(data.status)
+                })
+            })
+        })
+    </script>
+{% endblock %}
